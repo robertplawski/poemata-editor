@@ -42,7 +42,7 @@ def similarity(a: str, b: str) -> float:
 # List files recursively
 # ---------------------------
 
-@app.get("/files/")
+@app.get("/api/files/")
 async def list_files(query: str = Query(None, description="Search term to rank files by relevance")):
     file_list = []
 
@@ -58,7 +58,7 @@ async def list_files(query: str = Query(None, description="Search term to rank f
 # ---------------------------
 # Read file
 # ---------------------------
-@app.get("/files/{filepath:path}")
+@app.get("/api/files/{filepath:path}")
 async def read_file(filepath: str):
     path = get_file_path(filepath)
     if not os.path.isfile(path):
@@ -68,7 +68,7 @@ async def read_file(filepath: str):
 # ---------------------------
 # Preview file
 # ---------------------------
-@app.get("/preview/{filepath:path}",  response_class=HTMLResponse)
+@app.get("/api/preview/{filepath:path}",  response_class=HTMLResponse)
 async def preview_file(request:Request,filepath: str,      template: str = Query(..., description="Template name in templates folder")
 ):
    # Validate template exists
@@ -100,7 +100,7 @@ async def preview_file(request:Request,filepath: str,      template: str = Query
 # ---------------------------
 # Create file
 # ---------------------------
-@app.post("/files/{filepath:path}")
+@app.post("/api/files/{filepath:path}")
 async def create_file(filepath: str, file: FileData):
     path = get_file_path(filepath)
     if os.path.exists(path):
@@ -115,7 +115,7 @@ async def create_file(filepath: str, file: FileData):
 # ---------------------------
 # Update file
 # ---------------------------
-@app.put("/files/{filepath:path}")
+@app.put("/api/files/{filepath:path}")
 async def update_file(filepath: str, file: FileData):
     path = get_file_path(filepath)
     if not os.path.isfile(path):
@@ -129,7 +129,7 @@ async def update_file(filepath: str, file: FileData):
 # ---------------------------
 # Delete file
 # ---------------------------
-@app.delete("/files/{filepath:path}")
+@app.delete("/api/files/{filepath:path}")
 async def delete_file(filepath: str):
     path = get_file_path(filepath)
     if not os.path.isfile(path):

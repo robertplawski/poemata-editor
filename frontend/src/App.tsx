@@ -1,7 +1,7 @@
-import { Delete, DeleteIcon, Download, Edit, Eye, FilePlus, Folder, Info, LucideFilePlus, Printer, Search, Share, Share2, Trash, TrashIcon, type LucideIcon } from 'lucide-react';
-import { useEffect, useCallback, useReducer, useState, type ChangeEvent, useRef, type Ref, Children, type PropsWithChildren, type ReactElement } from 'react'
+import { Delete, DeleteIcon, Download, Edit, Eye, FileIcon, FilePlus, Folder, Info, LucideFilePlus, Printer, Search, Share, Share2, Trash, TrashIcon, type LucideIcon } from 'lucide-react';
+import { useEffect, useCallback, useReducer, useState, type ChangeEvent, useRef, type Ref, Children, type PropsWithChildren, type ReactElement, useMemo } from 'react'
 
-const API_ROOT = "http://localhost:8000"
+const API_ROOT = "/api"
 
 
 type FilesApiResponseType = {
@@ -115,9 +115,24 @@ function WindowHeader({ children, icon, title }: WindowHeaderProps) {
 
 
 }
+function downloadFile(url: string, filename?: string): void {
+  fetch(url)
+    .then((response: Response) => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.blob();
+    })
+    .then((blob: Blob) => {
+      const link: HTMLAnchorElement = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename ?? 'download.js';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    })
+    .catch((error: any) => console.error('Download error:', error));
+}
 
 function App() {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const [query, setQuery] = useState('');
@@ -125,6 +140,7 @@ function App() {
   const { openFile, editFile, setOpenFile, fileContent } = useEditor(iframeRef);
   const { files, loading, error } = useFiles(query);
 
+  const iframeSrc = useMemo(() => API_ROOT + `/preview/${openFile}?template=poem.html`, [openFile])
 
   return (
     <>
@@ -147,15 +163,23 @@ function App() {
 
             )}
           </ul >
-          <div className='border-t-1 justify-between px-4  border-neutral-200 py-2 flex flex-row items-center gap-2 w-full gap-4'>
+          <div className='border-t-1 justify-between  px-4  border-neutral-200 py-2 flex flex-row items-center gap-2 w-full gap-4'>
             <FilePlus />
             <div className='h-full border-r-1 border-neutral-200'></div>
-            <Printer />
-            <Share2 />
-            <Download />
-            <Info />
-            <Trash />
+            <div className={`flex flex-row gap-4 transition-all ` + (openFile == null ? 'opacity-[0.4] pointer-events-none' : ' ')}>
+              <button onClick={() => iframeRef && iframeRef.current && iframeRef.current.contentWindow.print()} className='cursor-pointer hover:opacity-[0.75] transition-all'>
+                <Printer />
 
+              </button>
+              <Share2 />
+
+              <button onClick={() => downloadFile(iframeSrc, openFile)} className='cursor-pointer hover:opacity-[0.75] transition-all'>
+                <Download />
+              </button>
+              <Info />
+              <Trash />
+
+            </div>
           </div>
           <div className='pl-4 pr-2 border-t-1 border-neutral-200 py-2 flex flex-row items-center gap-2 w-full gap-4'>
             <Edit />
@@ -165,7 +189,11 @@ function App() {
 
         </div>
 
-        {openFile == null ? <div className="flex flex-1 justify-center items-center">click file on the left to open it</div> : (
+        {openFile == null ? <div className="flex flex-1 flex-col gap-2 text-neutral-500 justify-center items-center">
+          <FileIcon />
+          <p>proszę otwórz plik</p>
+
+        </div> : (
           <>
             {fileContent && !loading && !error ?
 
@@ -184,7 +212,7 @@ function App() {
                   <option selected disabled>poem.html</option>
                 </select>
               </WindowHeader>
-              <iframe ref={iframeRef} src={API_ROOT + `/preview/${openFile}?template=poem.html`} className='flex-1 p-4' />
+              <iframe ref={iframeRef} src={iframeSrc} className='flex-1 p-4' />
             </div>
           </>
         )
