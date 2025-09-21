@@ -4,28 +4,32 @@
     <meta charset="UTF-8">
     <title>{{title}}</title>
     <style>
-          body {
-            font-size:24px;
-            display: flex;
-            flex-direction:column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            min-height: 100vh;
-            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        body {
+          font-size:24px;
+          display: flex;
+          flex-direction:column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          min-height: 100vh;
+          font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         }
         * {
             margin: 0;
             padding: 0;
         }
-       
+        span.dedication{
+          font-weight:bold;
+          font-style:italic;
+        }
+      
     </style>
   </head>
   <body>  
     <h2><b>{{ title }}</b></h2>
     <p>
         {% for line in content %}
-            {{ line }}<br>
+            {{ line|safe }}<br>
         {% endfor %}
     </p>
     <h5><b>{{ footer }}</b></h5>

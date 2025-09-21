@@ -69,7 +69,7 @@ async def preview_file(request:Request,filepath: str,      template: str = Query
     title = lines[0]
     footer = lines[-1]
     content = lines[1:-1]
-    # Render template with file content
+
     context = {
         "request": request,
         "content": content,
