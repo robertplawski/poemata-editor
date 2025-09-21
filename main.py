@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from difflib import SequenceMatcher
 
 app = FastAPI(title="File Manager API")
 
@@ -31,20 +32,29 @@ def index():
     index_path = os.path.join("frontend", "dist", "index.html")
     return FileResponse(index_path)
 
+
+def similarity(a: str, b: str) -> float:
+    """Return a similarity score between 0 and 1"""
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
+
 # ---------------------------
 # List files recursively
 # ---------------------------
+
 @app.get("/files/")
-async def list_files():
+async def list_files(query: str = Query(None, description="Search term to rank files by relevance")):
     file_list = []
+
     for root, dirs, files in os.walk(STORAGE_DIR):
         for f in files:
-            full_path = os.path.join(root, f)
-            rel_path = os.path.relpath(full_path, STORAGE_DIR)
-            file_list.append(rel_path)
+            file_list.append(f)
+
+    if query:
+        # Sort filenames by similarity to query (least to most probable)
+        file_list.sort(key=lambda f: similarity(f, query), reverse=True)
+
     return {"files": file_list}
-
-
 # ---------------------------
 # Read file
 # ---------------------------
