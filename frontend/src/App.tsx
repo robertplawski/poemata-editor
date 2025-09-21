@@ -1,5 +1,5 @@
-import { Delete, DeleteIcon, Download, Edit, Eye, FileIcon, FilePlus, Folder, Info, LucideFilePlus, Printer, Search, Share, Share2, Trash, TrashIcon, type LucideIcon } from 'lucide-react';
-import { useEffect, useCallback, useReducer, useState, type ChangeEvent, useRef, type Ref, Children, type PropsWithChildren, type ReactElement, useMemo } from 'react'
+import { Download, Edit, Eye, FileIcon, FilePlus, Folder, Info, Printer, Search, Share2, Trash } from 'lucide-react';
+import { useEffect, useCallback, useState, type ChangeEvent, useRef, type PropsWithChildren, type ReactElement, useMemo, type RefObject } from 'react'
 
 const API_ROOT = "/api"
 
@@ -46,7 +46,7 @@ const useFiles = (query?: string) => {
 }
 
 
-const useEditor = (iframeRef: Ref<HTMLIFrameElement>) => {
+const useEditor = (iframeRef: RefObject<HTMLIFrameElement | null>) => {
 
   const [openFile, setOpenFile] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string>();
@@ -70,6 +70,10 @@ const useEditor = (iframeRef: Ref<HTMLIFrameElement>) => {
         body: JSON.stringify(data)
       })
 
+      if (iframeRef == null) {
+        return;
+
+      }
       if (!iframeRef.current) {
         return;
       }
@@ -150,7 +154,7 @@ function App() {
           <WindowHeader icon={<Folder />} title="Pliki"></WindowHeader>
           <div className='pl-4 pr-2 border-b-1 border-neutral-200 pb-2 flex flex-row items-center gap-2 w-full gap-4'>
             <Search />
-            <input placeholder='Wyszukaj...' className='border-1 border-neutral-200 rounded-xl flex-1 p-2 shadow-sm' value={query} onInput={(e) => setQuery(e.target.value)} type="search" />
+            <input placeholder='Wyszukaj...' className='border-1 border-neutral-200 rounded-xl flex-1 p-2 shadow-sm' value={query} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target?.value)} type="search" />
 
           </div>
 
@@ -167,13 +171,13 @@ function App() {
             <FilePlus />
             <div className='h-full border-r-1 border-neutral-200'></div>
             <div className={`flex flex-row gap-4 transition-all ` + (openFile == null ? 'opacity-[0.4] pointer-events-none' : ' ')}>
-              <button onClick={() => iframeRef && iframeRef.current && iframeRef.current.contentWindow.print()} className='cursor-pointer hover:opacity-[0.75] transition-all'>
+              <button onClick={() => iframeRef && iframeRef.current && iframeRef.current.contentWindow?.print()} className='cursor-pointer hover:opacity-[0.75] transition-all'>
                 <Printer />
 
               </button>
               <Share2 />
 
-              <button onClick={() => downloadFile(iframeSrc, openFile)} className='cursor-pointer hover:opacity-[0.75] transition-all'>
+              <button onClick={() => downloadFile(iframeSrc, openFile || '')} className='cursor-pointer hover:opacity-[0.75] transition-all'>
                 <Download />
               </button>
               <Info />
@@ -183,7 +187,7 @@ function App() {
           </div>
           <div className='pl-4 pr-2 border-t-1 border-neutral-200 py-2 flex flex-row items-center gap-2 w-full gap-4'>
             <Edit />
-            <input placeholder='nowy_plik.txt' className='border-1 border-neutral-200 rounded-xl flex-1 p-2 shadow-sm' type="text" value={openFile} />
+            <input placeholder='nowy_plik.txt' className='border-1 border-neutral-200 rounded-xl flex-1 p-2 shadow-sm' type="text" value={openFile || ""} />
 
           </div>
 
