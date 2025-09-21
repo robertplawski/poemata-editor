@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, Request, Query, HTTPException
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -23,6 +24,12 @@ class FileData(BaseModel):
 def get_file_path(filepath: str):
     return os.path.join(STORAGE_DIR, filepath)
 
+app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
+
+@app.get("/")
+def index():
+    index_path = os.path.join("frontend", "dist", "index.html")
+    return FileResponse(index_path)
 
 # ---------------------------
 # List files recursively
