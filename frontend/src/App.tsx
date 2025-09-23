@@ -1,5 +1,5 @@
-import { Download, Edit, Eye, FileIcon, FilePlus, Folder, Info, Printer, Search, Share2, Trash } from 'lucide-react';
-import { useEffect, useCallback, useState, type ChangeEvent, useRef, type PropsWithChildren, type ReactElement, useMemo, type RefObject } from 'react'
+import { Download, Edit, Eye, FileIcon, FilePlus, Folder, Printer, Search, Trash } from 'lucide-react';
+import { useEffect, useCallback, useState, type ChangeEvent, useRef, type PropsWithChildren, type ReactElement, useMemo, type RefObject, type MouseEventHandler, type SetStateAction, type Dispatch, useReducer } from 'react'
 
 const API_ROOT = "/api"
 
@@ -8,12 +8,46 @@ type FilesApiResponseType = {
   files: FilesType
 };
 
-type FilesType = string[] | []
+type FilesType = string[];
 
-const useFiles = (query?: string) => {
+const useFiles = (setOpenFile: Dispatch<SetStateAction<string | null>>, query?: string) => {
+  const [refreshFilesIndicator, refreshFiles] = useReducer((v) => ++v, 0);
   const [files, setFiles] = useState<FilesType>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const deleteFile = useCallback(async (file: string) => {
+    if (prompt(`Czy napewno chcesz usunąć ${file}?\nNapisz "${file}" jeżeli tak.`) === file) {
+
+      await fetch(API_ROOT + `/files/${file}`, {
+        method: "DELETE"
+      })
+
+      setFiles((val) => val.filter(name => name !== file))
+      setOpenFile(null);
+    }
+  }, [files])
+  const createFile = useCallback(async () => {
+    const file = prompt(`Podaj nazwę pliku.`)
+    if (file) {
+      if (files.includes(file)) {
+        setOpenFile(file);
+        return;
+
+      } // yeah it should be on the backend too 
+      await fetch(API_ROOT + `/files/${file}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: "Tytuł\n\nZawartość\n\nStopka" })
+      })
+
+      //setFiles((val) => [...val, file])
+      setOpenFile(file);
+      refreshFiles();
+    }
+  }, [files, refreshFiles])
 
   useEffect(() => {
     // define async function inside useEffect
@@ -40,9 +74,9 @@ const useFiles = (query?: string) => {
     };
 
     fetchData();
-  }, [setFiles, setError, setLoading, query]);
+  }, [setFiles, setError, setLoading, query, refreshFilesIndicator]);
 
-  return { files, loading, error }
+  return { files, loading, error, deleteFile, createFile }
 }
 
 
@@ -53,6 +87,8 @@ const useEditor = (iframeRef: RefObject<HTMLIFrameElement | null>) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const downloadPreview = useCallback(() => iframeRef && iframeRef.current && downloadFile(iframeRef.current.src, openFile!.replace(/\.txt$/i, ".html")), [iframeRef, openFile])
+  const printPreview = useCallback(() => iframeRef && iframeRef.current && iframeRef.current.contentWindow?.print(), [iframeRef])
 
 
   const editFile = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -106,7 +142,7 @@ const useEditor = (iframeRef: RefObject<HTMLIFrameElement | null>) => {
     fetchData();
   }, [setFileContent, openFile])
 
-  return { openFile, setOpenFile, fileContent, editFile, loading, error }
+  return { openFile, setOpenFile, fileContent, editFile, loading, error, printPreview, downloadPreview }
 }
 
 type WindowHeaderProps = PropsWithChildren & { title: string, icon: ReactElement };
@@ -136,20 +172,28 @@ function downloadFile(url: string, filename?: string): void {
     .catch((error: any) => console.error('Download error:', error));
 }
 
+type IconButtonProps = PropsWithChildren<{ onClick: MouseEventHandler<HTMLButtonElement> }>
+
+const IconButton = ({ children, onClick }: IconButtonProps) => {
+  return <button onClick={onClick} className='cursor-pointer hover:opacity-[0.75] transition-all'>
+    {children}
+  </button>
+}
+
 function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const [query, setQuery] = useState('');
 
-  const { openFile, editFile, setOpenFile, fileContent } = useEditor(iframeRef);
-  const { files, loading, error } = useFiles(query);
+  const { openFile, editFile, setOpenFile, fileContent, printPreview, downloadPreview } = useEditor(iframeRef);
+  const { files, loading, error, deleteFile, createFile } = useFiles(setOpenFile, query);
 
   const iframeSrc = useMemo(() => API_ROOT + `/preview/${openFile}?template=poem.html`, [openFile])
 
   return (
     <>
       <div className="flex flex-row  overflow-hidden">
-        <div className='overflow-hidden flex flex-col  max-h-[100vh] border-r-1 border-neutral-200 shadow-md'>
+        <div className='overflow-hidden flex flex-col  min-h-[100vh] max-h-[100vh] border-r-1 border-neutral-200 shadow-md'>
 
           <WindowHeader icon={<Folder />} title="Pliki"></WindowHeader>
           <div className='pl-4 pr-2 border-b-1 border-neutral-200 pb-2 flex flex-row items-center gap-2 w-full gap-4'>
@@ -167,29 +211,29 @@ function App() {
 
             )}
           </ul >
-          <div className='border-t-1 justify-between  px-4  border-neutral-200 py-2 flex flex-row items-center gap-2 w-full gap-4'>
-            <FilePlus />
+          <div className='border-t-1 justify-between  p-4 border-neutral-200  flex flex-row items-center gap-2 w-full gap-4'>
+            <IconButton onClick={createFile}>
+              <FilePlus />
+            </IconButton>
             <div className='h-full border-r-1 border-neutral-200'></div>
             <div className={`flex flex-row gap-4 transition-all ` + (openFile == null ? 'opacity-[0.4] pointer-events-none' : ' ')}>
-              <button onClick={() => iframeRef && iframeRef.current && iframeRef.current.contentWindow?.print()} className='cursor-pointer hover:opacity-[0.75] transition-all'>
+              <IconButton onClick={printPreview}>
                 <Printer />
-
-              </button>
-              <Share2 />
-
-              <button onClick={() => downloadFile(iframeSrc, openFile || '')} className='cursor-pointer hover:opacity-[0.75] transition-all'>
+              </IconButton>
+              <IconButton onClick={downloadPreview}>
                 <Download />
-              </button>
-              <Info />
-              <Trash />
+              </IconButton>
+              <IconButton onClick={openFile ? () => deleteFile(openFile) : () => { }}>
+                <Trash />
+              </IconButton>
 
             </div>
           </div>
-          <div className='pl-4 pr-2 border-t-1 border-neutral-200 py-2 flex flex-row items-center gap-2 w-full gap-4'>
+          {/*<div className='pl-4 pr-2 border-t-1 border-neutral-200 py-2 flex flex-row items-center gap-2 w-full gap-4'>
             <Edit />
             <input placeholder='nowy_plik.txt' className='border-1 border-neutral-200 rounded-xl flex-1 p-2 shadow-sm' type="text" value={openFile || ""} />
 
-          </div>
+          </div>*/}
 
         </div>
 
@@ -203,7 +247,7 @@ function App() {
 
               <div className=' flex-1 flex border-r-1 border-neutral-200 flex-col justify-center overflow-y-hidden max-h-[100vh] items-center'>
                 <WindowHeader icon={<Edit />} title="Edytor">{openFile}</WindowHeader>
-                <textarea className='p-4 lg:p-8 w-full h-full resize-none whitespace-pre' onChange={(e) => editFile(e)} value={fileContent} />
+                <textarea className='outline-0 p-4 lg:p-8 w-full h-full resize-none whitespace-pre' onChange={(e) => editFile(e)} value={fileContent} />
               </div> :
 
               <div className='flex-1'></div>}

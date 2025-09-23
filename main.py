@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from difflib import SequenceMatcher
+import uvicorn
 
 app = FastAPI(title="File Manager API")
 
@@ -49,7 +50,8 @@ async def list_files(query: str = Query(None, description="Search term to rank f
     for root, dirs, files in os.walk(STORAGE_DIR):
         for f in files:
             file_list.append(f)
-
+        
+    file_list.sort()
     if query:
         # Sort filenames by similarity to query (least to most probable)
         file_list.sort(key=lambda f: similarity(f, query), reverse=True)
@@ -138,3 +140,6 @@ async def delete_file(filepath: str):
     os.remove(path)
     return {"message": "File deleted", "file": filepath}
 
+if __name__ == "__main__":
+    # Run Uvicorn server
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

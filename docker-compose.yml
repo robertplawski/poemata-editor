@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  poemata-editor:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./storage:/app/storage
+      - ./templates:/app/templates
+    environment:
+      - UVICORN_HOST=0.0.0.0
+      - UVICORN_PORT=8000
+      - UVICORN_WORKERS=4

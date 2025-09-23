@@ -26,12 +26,12 @@
     </style>
   </head>
   <body>  
-    <h2><b>{{ title }}</b></h2>
+    <h2><b>{{ title |safe }}</b></h2>
     <p>
         {% for line in content %}
             {{ line|safe }}<br>
         {% endfor %}
     </p>
-    <h5><b>{{ footer }}</b></h5>
+    <h5><b>{{ footer |safe}}</b></h5>
   </body>
 </html>
