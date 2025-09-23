@@ -1,50 +1,47 @@
-# Multi-stage build: first stage builds the React frontend
+# ===== Frontend build stage =====
 FROM node:22-alpine AS frontend-builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy frontend package files
+# Copy only package files first (cache-friendly)
 COPY frontend/package*.json ./
 
-# Install frontend dependencies
-RUN npm install
+# Deterministic install, faster and cleaner than npm install
+RUN npm ci
 
-# Copy frontend source code
+# Copy the rest of the frontend source
 COPY frontend/ .
 
-# Build the React application
+# Build the React app
 RUN npm run build
 
-# Production stage
-FROM python:3.13-slim
 
-# Set working directory
+# ===== Backend stage =====
+FROM python:3.13-slim AS backend
+
 WORKDIR /app
 
-# Set environment variables
+# Environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UVICORN_HOST=0.0.0.0 \
-    UVICORN_PORT=8000 
+    UVICORN_PORT=8000
 
-# Copy requirements file
+# Copy requirements and install BEFORE code (cache-friendly)
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
-# Copy built frontend files from the frontend-builder stage
-COPY --from=frontend-builder /app/dist ./frontend/dist
-
-# Copy application code
+# Copy backend source code
 COPY . .
 
-# Create storage directory
+# Copy built frontend into backend image
+COPY --from=frontend-builder /app/dist ./frontend/dist
+
+# Storage directory
 RUN mkdir -p storage
 
-# Expose port
 EXPOSE 8000
 
-# Run the application
+# Run app
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
