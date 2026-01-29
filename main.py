@@ -90,7 +90,7 @@ async def preview_file(request:Request,filepath: str,      template: str = Query
         lines = [""]
 
     title = lines[0]
-    footer = lines[-1]
+    footer = lines[-1] if len(lines) > 1 else ""
     content = lines[1:-1]
 
     context = {
