@@ -57,7 +57,7 @@ export const useFiles = (setOpenFile: Dispatch<SetStateAction<string | null>>, q
         }
         const { files: data }: FilesApiResponseType = await response.json();
         setFiles(data);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -69,7 +69,7 @@ export const useFiles = (setOpenFile: Dispatch<SetStateAction<string | null>>, q
   }, [setFiles, setError, setLoading, query, refreshFilesIndicator]);
 
   return { files, loading, error, deleteFile, createFile };
-};export type FilesType = string[];
+}; export type FilesType = string[];
 export type FilesApiResponseType = {
   files: FilesType;
 };
