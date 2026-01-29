@@ -33,7 +33,11 @@ function App() {
           <ul className='flex-1 px-4 py-2 overflow-scroll'>
             {!loading && !error && files.map((file, index) =>
               <li key={index} className={(openFile == file ? 'font-bold ' : '') + 'py-2 border-b-1 border-neutral-200 py-2 flex flex-row gap-2 cursor-pointer'} onClick={() => setOpenFile(file)}>
-                {file}</li>
+                <button>
+
+                  {file}
+                </button>
+              </li>
 
 
             )}
