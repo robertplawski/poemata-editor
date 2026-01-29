@@ -5,6 +5,7 @@ import { WindowHeader } from './components/WindowHeader';
 import { useEditor } from './hooks/useEditor';
 import { useFiles } from './hooks/useFiles';
 import EditorWindowToolbar from './components/EditorWindowToolbar';
+import SelectTemplate from './components/SelectTemplate';
 
 export const API_ROOT = "/api"
 
@@ -13,11 +14,12 @@ function App() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [query, setQuery] = useState('');
+  const [template, setTemplate] = useState('');
 
   const { openFile, editFile, setOpenFile, fileContent, printPreview, downloadPreview } = useEditor(iframeRef);
   const { files, loading, error, deleteFile, createFile } = useFiles(setOpenFile, query);
 
-  const iframeSrc = useMemo(() => API_ROOT + `/preview/${openFile}?template=poem.html`, [openFile])
+  const iframeSrc = useMemo(() => API_ROOT + `/preview/${openFile}?template=${template}`, [openFile, template])
 
   return (
     <>
@@ -36,7 +38,6 @@ function App() {
             {!loading && !error && files.map((file, index) =>
               <li key={index} className={(openFile == file ? 'font-bold ' : '') + 'py-2 border-b-1 border-neutral-200 py-2 flex flex-row gap-2 cursor-pointer'} onClick={() => setOpenFile(file)}>
                 <button>
-
                   {file}
                 </button>
               </li>
@@ -81,10 +82,7 @@ function App() {
             <div className='flex-1 whitespace-pre flex flex-col'>
 
               <WindowHeader icon={<Eye />} title="Podgląd">
-                <select>
-                  {/* todo */}
-                  <option selected disabled>poem.html</option>
-                </select>
+                <SelectTemplate template={template} setTemplate={setTemplate} />
               </WindowHeader>
               <iframe ref={iframeRef} src={iframeSrc} className='flex-1 p-4' />
             </div>

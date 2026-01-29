@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>{{title}}</title>
+		<style>
+			body{
+				background:black;
+				color:white;
+				font-size:24px;
+				display: flex;
+				flex-direction:column;
+				justify-content:center;
+				align-items:center;
+				min-height: 100vh;
+				font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+			}
+			main{
+				background-color:#0e0e0e;
+				width:400px;
+				height:300px;
+				border-radius:1rem;
+				padding:1rem;
+			}
+			* {
+				margin: 0px;
+				padding: 0px;
+				box-sizing:border-box;
+			}
+			span.dedication{
+				font-weight:bold;
+				font-style:italic;
+			}
+			code{
+				text-wrap:pre;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<pre>{{raw | safe}}</pre>
+		</main>
+	</body>
+</html>

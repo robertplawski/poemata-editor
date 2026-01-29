@@ -1,4 +1,5 @@
 import os
+from typing import List
 from fastapi import FastAPI, Request, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
@@ -67,7 +68,25 @@ async def read_file(filepath: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(path)
 
-# ---------------------------
+
+@app.get("/api/templates")
+async def show_available_templates() -> List[str]:
+    templates_dir = "templates"     
+    if not os.path.exists(templates_dir):
+        return []  
+    
+    if not os.path.isdir(templates_dir):
+        return []
+
+    all_items = os.listdir(templates_dir)
+    
+    template_files = [
+        item for item in all_items 
+        if os.path.isfile(os.path.join(templates_dir, item))
+    ]
+    
+    return template_files
+
 # Preview file
 # ---------------------------
 @app.get("/api/preview/{filepath:path}",  response_class=HTMLResponse)
@@ -98,6 +117,7 @@ async def preview_file(request:Request,filepath: str,      template: str = Query
         "content": content,
         "title":title,
         "footer":footer,
+        "raw": "\n".join(lines)
     }
     return templates.TemplateResponse(template, context)
 
