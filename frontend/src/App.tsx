@@ -4,11 +4,13 @@ import { IconButton } from './components/IconButton';
 import { WindowHeader } from './components/WindowHeader';
 import { useEditor } from './hooks/useEditor';
 import { useFiles } from './hooks/useFiles';
+import EditorWindowToolbar from './components/EditorWindowToolbar';
 
 export const API_ROOT = "/api"
 
 function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [query, setQuery] = useState('');
 
@@ -70,7 +72,8 @@ function App() {
 
               <div className=' flex-1 flex border-r-1 border-neutral-200 flex-col justify-center overflow-y-hidden max-h-[100vh] items-center'>
                 <WindowHeader icon={<Edit />} title="Edytor">{openFile}</WindowHeader>
-                <textarea className='outline-0 p-4 lg:p-8 w-full h-full resize-none whitespace-pre' onChange={(e) => editFile(e)} value={fileContent} />
+                <EditorWindowToolbar textAreaRef={textAreaRef} />
+                <textarea ref={textAreaRef} className='outline-0 p-4 lg:p-8 w-full h-full resize-none whitespace-pre' onChange={(e) => editFile(e)} value={fileContent} />
               </div> :
 
               <div className='flex-1'></div>}
