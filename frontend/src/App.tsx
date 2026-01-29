@@ -68,7 +68,7 @@ function App() {
           <p>proszę otwórz plik</p>
         </div> : (
           <>
-            {fileContent && !loading && !error ?
+            {!loading && !error ?
 
               <div className=' flex-1 flex border-r-1 border-neutral-200 flex-col justify-center overflow-y-hidden max-h-[100vh] items-center'>
                 <WindowHeader icon={<Edit />} title="Edytor">{openFile}</WindowHeader>

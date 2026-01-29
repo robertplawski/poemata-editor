@@ -12,7 +12,7 @@ import {
 } from "react";
 
 interface EditorWindowToolbarProps {
-  textAreaRef: RefObject<HTMLTextAreaElement>;
+  textAreaRef: RefObject<HTMLTextAreaElement | null>;
 }
 
 interface TextAreaState {
@@ -21,7 +21,7 @@ interface TextAreaState {
   selectionEnd: number;
 }
 
-const getTextAreaState = (ref: RefObject<HTMLTextAreaElement>): TextAreaState | null => {
+const getTextAreaState = (ref: RefObject<HTMLTextAreaElement | null>): TextAreaState | null => {
   const element = ref.current;
   if (!element) return null;
 
@@ -32,7 +32,7 @@ const getTextAreaState = (ref: RefObject<HTMLTextAreaElement>): TextAreaState | 
   };
 };
 
-const getSelectedText = (ref: RefObject<HTMLTextAreaElement>): string | null => {
+const getSelectedText = (ref: RefObject<HTMLTextAreaElement | null>): string | null => {
   const state = getTextAreaState(ref);
   if (!state) return null;
 
@@ -41,7 +41,7 @@ const getSelectedText = (ref: RefObject<HTMLTextAreaElement>): string | null => 
 };
 
 const replaceSelectedText = (
-  ref: RefObject<HTMLTextAreaElement>,
+  ref: RefObject<HTMLTextAreaElement | null>,
   newText: string
 ): boolean => {
   const element = ref.current;

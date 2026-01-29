@@ -85,6 +85,10 @@ async def preview_file(request:Request,filepath: str,      template: str = Query
     path = get_file_path(filepath)
     with open(path, "r", encoding="utf-8") as f:
         lines = f.read().splitlines()
+
+    if len(lines) == 0:
+        lines = [""]
+
     title = lines[0]
     footer = lines[-1]
     content = lines[1:-1]
