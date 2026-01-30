@@ -71,19 +71,18 @@ async def read_file(filepath: str):
 
 @app.get("/api/templates")
 async def show_available_templates() -> List[str]:
-    templates_dir = "templates"     
-    if not os.path.exists(templates_dir):
+    if not os.path.exists(TEMPLATE_DIR):
         return []  
     
-    if not os.path.isdir(templates_dir):
+    if not os.path.isdir(TEMPLATE_DIR):
         return []
 
-    all_items = os.listdir(templates_dir)
+    all_items = os.listdir(TEMPLATE_DIR)
     
-    template_files = [
+    template_files = sorted([
         item for item in all_items 
-        if os.path.isfile(os.path.join(templates_dir, item))
-    ]
+        if os.path.isfile(os.path.join(TEMPLATE_DIR, item))
+    ], reverse=True)
     
     return template_files
 
