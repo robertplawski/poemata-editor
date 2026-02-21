@@ -1,4 +1,6 @@
 import {
+  ArrowLeft,
+  ArrowRight,
   Download,
   Edit,
   Eye,
@@ -16,6 +18,7 @@ import SelectTemplate from "./components/SelectTemplate";
 import { WindowHeader } from "./components/WindowHeader";
 import { useEditor } from "./hooks/useEditor";
 import { useFiles } from "./hooks/useFiles";
+import NavigationButton from "./components/mobile/NavigationButton";
 
 export const API_ROOT = "/api";
 
@@ -44,9 +47,17 @@ function App() {
     [openFile, template],
   );
 
+  const containerRef = useRef<HTMLElement>(null);
+
   return (
-    <div className="flex flex-row  overflow-hidden">
-      <div className="overflow-hidden flex flex-col  min-h-[100vh] max-h-[100vh] border-r-1 border-neutral-200 shadow-md">
+    <div
+      ref={containerRef}
+      className="snap-x snap-mandatory scroll-smooth grid grid-cols-[100vw_100vw_100vw] md:grid-cols-[min-content_1fr_1fr] overflow-x-scroll overflow-y-hidden min-h[100vh] max-h-[100vh]"
+    >
+      <NavigationButton containerRef={containerRef} direction="left" />
+      <NavigationButton containerRef={containerRef} direction="right" />
+
+      <div className="snap-center overflow-hidden flex flex-col  min-h-[100vh] max-h-[100vh] border-r-1 border-neutral-200 shadow-md">
         <WindowHeader icon={<Folder />} title="Pliki"></WindowHeader>
         <div className="pl-4 pr-2 border-b-1 border-neutral-200 pb-2 flex flex-row items-center gap-2 w-full gap-4">
           <Search />
@@ -104,14 +115,14 @@ function App() {
         </div>
       </div>
       {openFile == null ? (
-        <div className="flex flex-1 flex-col gap-2 text-neutral-500 justify-center items-center">
+        <div className="snap-center flex flex-1 flex-col gap-2 text-neutral-500 justify-center items-center">
           <FileIcon />
           <p>proszę otwórz plik</p>
         </div>
       ) : (
         <>
           {!loading && !error ? (
-            <div className=" flex-1 flex border-r-1 border-neutral-200 flex-col justify-center overflow-y-hidden max-h-[100vh] items-center">
+            <div className="snap-center flex-1 flex border-r-1 border-neutral-200 flex-col justify-center overflow-y-hidden max-h-[100vh] items-center">
               <WindowHeader icon={<Edit />} title="Edytor">
                 {openFile}
               </WindowHeader>
@@ -127,7 +138,7 @@ function App() {
             <div className="flex-1"></div>
           )}
 
-          <div className="flex-1 whitespace-pre flex flex-col">
+          <div className=" snap-center flex-1 whitespace-pre flex flex-col">
             <WindowHeader icon={<Eye />} title="Podgląd">
               <SelectTemplate template={template} setTemplate={setTemplate} />
             </WindowHeader>
