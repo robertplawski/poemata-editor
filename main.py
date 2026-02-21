@@ -1,6 +1,7 @@
 import os
 from typing import List
 from fastapi import FastAPI, Request, Query, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
@@ -9,6 +10,18 @@ from difflib import SequenceMatcher
 import uvicorn
 
 app = FastAPI(title="File Manager API")
+
+origins = [
+    "*" # yeah should change that for 'production'
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 TEMPLATE_DIR = "templates"
 STORAGE_DIR = "storage"
