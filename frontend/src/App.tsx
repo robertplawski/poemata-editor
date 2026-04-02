@@ -1,6 +1,4 @@
 import {
-  ArrowLeft,
-  ArrowRight,
   Download,
   Edit,
   Eye,
@@ -47,7 +45,7 @@ function App() {
     [openFile, template],
   );
 
-  const containerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
@@ -115,7 +113,7 @@ function App() {
         </div>
       </div>
       {openFile == null ? (
-        <div className="snap-center flex flex-1 flex-col gap-2 text-neutral-500 justify-center items-center">
+        <div className="col-span-2 snap-center flex flex-1 flex-col gap-2 text-neutral-500 justify-center items-center">
           <FileIcon />
           <p>proszę otwórz plik</p>
         </div>

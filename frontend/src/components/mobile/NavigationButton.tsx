@@ -1,11 +1,5 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import {
-  type RefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type RefObject, useEffect, useMemo, useState } from "react";
 import { cn } from "../../utils/cn";
 import { IconButton } from "../IconButton";
 
